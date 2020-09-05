@@ -304,63 +304,66 @@ public class MinitouchAgent extends Thread {
         try {
 
 
-            Touch touch = new Touch();
-            touch.startX = 100;
-            touch.startY = 1000;
-            touch.type = Touch.TOUCH_NORMAL;
-
-            int t1 = atouch.down(touch);
+            int t1 = atouch.down(Touch.TOUCH_NORMAL,100,1000,0,0,0);
             Thread.sleep(1000);
 
-            touch.startX = 300;
-            touch.startY = 1300;
-            int t2 = atouch.down(touch);
+            int t2 = atouch.down(Touch.TOUCH_NORMAL,300,1300,0,0,0);
             Thread.sleep(1000);
 
-            touch.startX = 500;
-            touch.startY = 1600;
-            int t3 = atouch.down(touch);
+
+            int t3 = atouch.down(Touch.TOUCH_NORMAL,500,1600,0,0,0);
             Thread.sleep(1000);
 
             atouch.up(t3);
             Thread.sleep(1000);
-            touch.startX = 550;
-            touch.startY = 1650;
-            t3 = atouch.down(touch);
+
+            t3 = atouch.down(Touch.TOUCH_NORMAL,550,1650,0,0,0);
             Thread.sleep(1000);
 
-            touch.startX = 700;
-            touch.startY = 1900;
-            int t4 = atouch.down(touch);
-            Thread.sleep(1000);
+
+//            int t4 = atouch.down(Touch.TOUCH_NORMAL,700,1900,0,0,0);
+//            Thread.sleep(1000);
 
             atouch.up(t2);
             Thread.sleep(1000);
 
-            touch.startX = 350;
-            touch.startY = 1350;
-            t2 = atouch.down(touch);
+
+            t2 = atouch.down(Touch.TOUCH_NORMAL,350,1350,0,0,0);
             Thread.sleep(1000);
+
+
+            int t5 = atouch.down(Touch.TOUCH_MOVE_UP,200,600,600,1000,500);
+            Thread.sleep(1000);
+
+
+            int t6 = atouch.down(Touch.TOUCH_MOVE_NORMAL,300,600,700,1000,500);
+            Thread.sleep(800);
+
+            int t7 = atouch.down(Touch.TOUCH_MOVE_UP,400,600,800,1000,500);
+            Thread.sleep(600);
+
+            int t8 = atouch.down(Touch.TOUCH_MOVE_NORMAL,500,600,900,1000,500);
+            Thread.sleep(400);
 
             atouch.move(t1,200,1100);
             Thread.sleep(1000);
 
             atouch.move(t2,400,1400);
             Thread.sleep(1000);
+//
+//            atouch.move(t3,600,1700);
+//            Thread.sleep(1000);
 
-            atouch.move(t3,600,1700);
-            Thread.sleep(1000);
-
-            atouch.move(t4,800,2000);
-            Thread.sleep(1000);
+//            atouch.move(t4,800,2000);
+//            Thread.sleep(1000);
 
             atouch.up(t1);
             Thread.sleep(1000);
             atouch.up(t2);
             Thread.sleep(1000);
             atouch.up(t3);
-            Thread.sleep(1000);
-            atouch.up(t4);
+//            Thread.sleep(1000);
+//            atouch.up(t4);
 
         } catch (InterruptedException e) {
             e.printStackTrace();

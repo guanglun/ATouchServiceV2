@@ -1,6 +1,6 @@
 package com.guanglun.service.util;
 
-public class Touch {
+public class Touch implements Cloneable{
 
     public static final int TOUCH_NORMAL        = 0;
     public static final int TOUCH_MOVE_NORMAL   = 1;
@@ -12,17 +12,16 @@ public class Touch {
     public int startY;
     public int endX;
     public int endY;
-    public int nowX;
-    public int nowY;
     public int step;
     public int stepCount;
+    public int id;
 
-    void Touch()
+    Touch()
     {
         this.isUse = false;
     }
 
-    void Touch(int type,int startX,int startY,int endX,int endY,int step)
+    Touch(int type,int startX,int startY,int endX,int endY,int step)
     {
         this.type = type;
         this.startX = startX;
@@ -31,4 +30,5 @@ public class Touch {
         this.endY = endY;
         this.step = step;
     }
+
 }

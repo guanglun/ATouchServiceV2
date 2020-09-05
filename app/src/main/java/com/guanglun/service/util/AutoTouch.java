@@ -6,15 +6,15 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AutoTouch {
 
     public static final int TOUCH_NUM               = 9;
     public static final int TOUCH_ERROR_ID          = 255;
 
-    private static Map<Integer, Touch> mapTouch = new ConcurrentHashMap<Integer, Touch>();
+    private Map<Integer, Touch> mapTouch = new HashMap<>();
 
     private ArrayList<MotionEvent.PointerProperties> pplist = new ArrayList<MotionEvent.PointerProperties>();
     private ArrayList<MotionEvent.PointerCoords> pclist = new ArrayList<MotionEvent.PointerCoords>();
@@ -22,15 +22,76 @@ public class AutoTouch {
     private TouchCallback cb;
     private MotionEvent event;
 
+    private Thread threadTouch = null;
+
     public interface TouchCallback {
         void onTouch(MotionEvent event);
     }
 
     public AutoTouch(TouchCallback cb)
     {
-        this.cb = cb;
 
+        this.cb = cb;
+        threadTouch = new Thread(touchRunnable);
+        threadTouch.start();
     }
+
+    private Runnable touchRunnable = new Runnable() {
+        @Override
+        public synchronized void run() {
+
+            int x, y;
+
+            while(true)
+            {
+                for(Touch touch : mapTouch.values())
+                {
+                    if(touch != null)
+                    {
+                        if(touch.type != Touch.TOUCH_NORMAL)
+                        {
+                            //Log.i("ATouchService", "move " + touch.id + " " + touch.stepCount);
+                            if (touch.stepCount < touch.step)
+                            {
+                                touch.stepCount++;
+
+                                x = touch.startX + (touch.endX - touch.startX) * touch.stepCount / touch.step;
+                                y = touch.startY + (touch.endY - touch.startY) * touch.stepCount / touch.step;
+
+
+                                move(touch.id, x, y);
+
+                                mapTouch.put(touch.id,touch);
+                            }
+                            else
+                            {
+                                if (touch.type == Touch.TOUCH_MOVE_UP)
+                                {
+                                    up(touch.id);
+                                    break;
+                                }
+                                else if (touch.type == Touch.TOUCH_MOVE_NORMAL)
+                                {
+                                    touch.type = Touch.TOUCH_NORMAL;
+
+                                    mapTouch.put(touch.id,touch);
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    };
 
     private MotionEvent.PointerProperties getPointerProperties()
     {
@@ -67,10 +128,11 @@ public class AutoTouch {
         return motionEnvent + (index << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
     }
 
-    public int down(Touch touch)
-    {
-        int id = TOUCH_ERROR_ID;
+    public int down(int type,int startX,int startY,int endX,int endY,int step) {
         long now = SystemClock.uptimeMillis();
+        Touch touch = new Touch(type,startX,startY,endX,endY,step);
+
+        int id = TOUCH_ERROR_ID;
         int size = mapTouch.size();
 
         if(size > TOUCH_NUM)
@@ -123,8 +185,13 @@ public class AutoTouch {
 
         }
 
-        mapTouch.put(id,touch);
+        Log.i("ATouchService", "down "+id+" " + event.getAction());
+
+        touch.id = id;
         cb.onTouch(event);
+        mapTouch.put(id,touch);
+
+
 
         return id;
     }
@@ -135,6 +202,8 @@ public class AutoTouch {
         Touch touch = mapTouch.get(id);
         int size = mapTouch.size();
         int index;
+
+        //Log.i("ATouchService", "move "+id);
 
         if(touch != null) {
 
@@ -197,6 +266,8 @@ public class AutoTouch {
                         InputDevice.SOURCE_TOUCHSCREEN, 0);
 
             }
+
+            Log.i("ATouchService", "up "+id+" " + event.getAction() + " " + size);
 
             mapTouch.remove(id);
 
