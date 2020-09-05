@@ -15,7 +15,9 @@ import android.view.InputEvent;
 import android.view.MotionEvent;
 
 import com.guanglun.service.compat.InputManagerWrapper;
+import com.guanglun.service.util.AutoTouch;
 import com.guanglun.service.util.InternalApi;
+import com.guanglun.service.util.Touch;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -286,77 +288,83 @@ public class MinitouchAgent extends Thread {
             return;
         }
 
-        Log.i(TAG, "guanglun test input");
+        Log.i("ATouchService", "guanglun test input");
 
-//        PointerEvent event = new PointerEvent();
-//        event.action = MotionEvent.ACTION_DOWN;
-//        event.lastX = 500;
-//        event.lastY = 500;
-//
-//        injectEvent(getMotionEvent(event));
-//
-//        event.lastX = 1000;
-//        event.lastY = 1000;
-//
-//        injectEvent(getMotionEvent(event));
 
-        pointerProperties[0].id = 0;
-        pointerProperties[1].id = 1;
+        AutoTouch atouch = new AutoTouch(new AutoTouch.TouchCallback() {
+            @Override
+            public void onTouch(MotionEvent event) {
+                injectEvent(event);
+            }
+        }
+        );
 
-        pointerCoords[0].x = 100;
-        pointerCoords[0].y = 1000;
 
-        pointerCoords[1].x = 400;
-        pointerCoords[1].y = 1000;
-
-        long now = SystemClock.uptimeMillis();
-        MotionEvent te = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, 1, pointerProperties,
-                pointerCoords, 0, 0, 1f, 1f, 0, 0,
-                InputDevice.SOURCE_TOUCHSCREEN, 0);
-
-        injectEvent(te);
 
         try {
+
+
+            Touch touch = new Touch();
+            touch.startX = 100;
+            touch.startY = 1000;
+            touch.type = Touch.TOUCH_NORMAL;
+
+            int t1 = atouch.down(touch);
             Thread.sleep(1000);
+
+            touch.startX = 300;
+            touch.startY = 1300;
+            int t2 = atouch.down(touch);
+            Thread.sleep(1000);
+
+            touch.startX = 500;
+            touch.startY = 1600;
+            int t3 = atouch.down(touch);
+            Thread.sleep(1000);
+
+            atouch.up(t3);
+            Thread.sleep(1000);
+            touch.startX = 550;
+            touch.startY = 1650;
+            t3 = atouch.down(touch);
+            Thread.sleep(1000);
+
+            touch.startX = 700;
+            touch.startY = 1900;
+            int t4 = atouch.down(touch);
+            Thread.sleep(1000);
+
+            atouch.up(t2);
+            Thread.sleep(1000);
+
+            touch.startX = 350;
+            touch.startY = 1350;
+            t2 = atouch.down(touch);
+            Thread.sleep(1000);
+
+            atouch.move(t1,200,1100);
+            Thread.sleep(1000);
+
+            atouch.move(t2,400,1400);
+            Thread.sleep(1000);
+
+            atouch.move(t3,600,1700);
+            Thread.sleep(1000);
+
+            atouch.move(t4,800,2000);
+            Thread.sleep(1000);
+
+            atouch.up(t1);
+            Thread.sleep(1000);
+            atouch.up(t2);
+            Thread.sleep(1000);
+            atouch.up(t3);
+            Thread.sleep(1000);
+            atouch.up(t4);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        pointerProperties[0].id = 1;
-        pointerProperties[1].id = 1;
-
-        pointerCoords[0].x = 300;
-        pointerCoords[0].y = 1000;
-
-
-        te = MotionEvent.obtain(now, now, MotionEvent.ACTION_POINTER_DOWN, 1, pointerProperties,
-                pointerCoords, 0, 0, 1f, 1f, 0, 0,
-                InputDevice.SOURCE_TOUCHSCREEN, 0);
-
-        injectEvent(te);
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        pointerProperties[0].id = 0;
-        pointerProperties[1].id = 1;
-
-        pointerCoords[0].x = 200;
-        pointerCoords[0].y = 1100;
-
-
-        te = MotionEvent.obtain(now, now, MotionEvent.ACTION_MOVE, 1, pointerProperties,
-                pointerCoords, 0, 0, 1f, 1f, 0, 0,
-                InputDevice.SOURCE_TOUCHSCREEN, 0);
-
-        injectEvent(te);
-
-
-
-
 
         manageClientConnection();
 
