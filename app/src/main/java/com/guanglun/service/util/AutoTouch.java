@@ -50,7 +50,7 @@ public class AutoTouch {
                     {
                         if(touch.type != Touch.TOUCH_NORMAL)
                         {
-                            //Log.i("ATouchService", "move " + touch.id + " " + touch.stepCount);
+                            //Log.i(EasyTool.TAG, "move " + touch.id + " " + touch.stepCount);
                             if (touch.stepCount < touch.step)
                             {
                                 touch.stepCount++;
@@ -185,7 +185,7 @@ public class AutoTouch {
 
         }
 
-        Log.i("ATouchService", "down "+id+" " + event.getAction());
+        Log.i(EasyTool.TAG, "down "+id+" " + event.getAction());
 
         touch.id = id;
         cb.onTouch(event);
@@ -203,7 +203,7 @@ public class AutoTouch {
         int size = mapTouch.size();
         int index;
 
-        //Log.i("ATouchService", "move "+id);
+        //Log.i(EasyTool.TAG, "move "+id);
 
         if(touch != null) {
 
@@ -267,7 +267,7 @@ public class AutoTouch {
 
             }
 
-            Log.i("ATouchService", "up "+id+" " + event.getAction() + " " + size);
+            Log.i(EasyTool.TAG, "up "+id+" " + event.getAction() + " " + size);
 
             mapTouch.remove(id);
 

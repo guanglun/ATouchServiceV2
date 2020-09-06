@@ -20,9 +20,7 @@ import java.io.InputStreamReader;
 
 public class ATouchService extends Service {
 
-    private static String TAG = "ATouchService";
-
-    // We can only access CLIPBOARD_SERVICE from the main thread
+    private static final String TAG = "ATouchService";
     private static Object clipboardManager;
     private static final int NOTIFICATION_ID = 0x1;
 
@@ -41,7 +39,6 @@ public class ATouchService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "onCreate()");
 
         clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE);
 
