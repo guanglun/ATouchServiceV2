@@ -19,12 +19,17 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 public class EasyTool {
 
@@ -425,6 +430,53 @@ public class EasyTool {
         }
         return "0.0.0.0";
 
+    }
+
+    /**
+     * 获取正在运行的进程信息
+     *
+     * @return
+     */
+    public static void checkKillThread(String name) {
+
+        int pid = android.os.Process.myPid();
+        Log.i(EasyTool.TAG, "StartUp PID: " + pid);
+        List<Integer> pidList = new ArrayList<Integer>();
+        String line = null;
+        Runtime mRuntime = Runtime.getRuntime();
+        String[] psCmd = {"ps","ps -A"};
+        try {
+
+            for(String cmd:psCmd) {
+
+                Process mProcess = mRuntime.exec(cmd);
+                BufferedReader mReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()));
+
+                line = mReader.readLine();
+                while (line != null) {
+                    if (line.contains(name)) {
+                        Log.i(EasyTool.TAG, line);
+                        line = line.replaceAll("\\s{1,}", " ");
+                        String[] strs = line.split(" ");
+
+                        if (strs.length > 2) {
+                            int id = Integer.parseInt(strs[1]);
+                            if (pid != id) {
+                                Log.i(EasyTool.TAG, "kill -9 " + id);
+                                mRuntime.exec("kill -9 " + id);
+                            }
+                        }
+                    }
+                    line = mReader.readLine();
+                }
+                mReader.close();
+            }
+
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }

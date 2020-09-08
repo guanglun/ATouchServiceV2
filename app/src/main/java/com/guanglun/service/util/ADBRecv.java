@@ -46,7 +46,7 @@ public class ADBRecv {
             else if ((receive_adb_flag == (data_adb_len + 3)) && (check_adb == data))
             {
                 isSuccess = true;
-                Log.i(EasyTool.TAG, "adbRecv success");
+                //Log.i(EasyTool.TAG, "adbRecv success");
                 adbRecvProtocol(data_adb_buffer, data_adb_len);
                 receive_adb_flag = 0;
             }

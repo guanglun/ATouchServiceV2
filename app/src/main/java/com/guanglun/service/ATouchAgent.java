@@ -55,11 +55,14 @@ public class ATouchAgent extends Thread {
 
 
     public static void main(String[] args) {
-        //To create a Handler our main thread has to prepare the Looper
+
+        Log.i(EasyTool.TAG, "ATouchAgent Start");
+
+        EasyTool.checkKillThread("atouch_process");
+
         Looper.prepare();
         Handler handler = new Handler();
         Point size = getScreenSize();
-        Log.i(EasyTool.TAG, "getScreenSize " + size.x + " " + size.y);
         if(size != null) {
             ATouchAgent m = new ATouchAgent(size.x, size.y, handler);
             m.start();
@@ -81,10 +84,6 @@ public class ATouchAgent extends Thread {
 
     @Override
     public void run() {
-
-        Log.i(EasyTool.TAG, "ATouchAgent Start");
-
-
         AutoTouch atouch = new AutoTouch(new AutoTouch.TouchCallback() {
             @Override
             public void onTouch(MotionEvent event) {

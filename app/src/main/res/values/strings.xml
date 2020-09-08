@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">ATouch Service</string>
-    <string name="service_ticker">ATouch Service running</string>
-    <string name="service_title">ATouch Service</string>
-    <string name="service_text">ATouch Service is running.</string>
+    <string name="app_name">ATouchService</string>
+    <string name="service_ticker">ATouchService running</string>
+    <string name="service_title">ATouchService</string>
+    <string name="service_text">ATouchService is running.</string>
 </resources>

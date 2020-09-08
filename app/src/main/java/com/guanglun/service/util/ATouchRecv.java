@@ -56,7 +56,7 @@ public class ATouchRecv {
             else if ((receive_atouch_flag == (data_atouch_len + 4)) && (check_atouch == data))
             {
                 isSuccess = true;
-                Log.i(EasyTool.TAG, "atouchRecv success");
+                //Log.i(EasyTool.TAG, "atouchRecv success");
                 recvProtocol(data_atouch_buffer, data_atouch_len);
                 receive_atouch_flag = 0;
             }

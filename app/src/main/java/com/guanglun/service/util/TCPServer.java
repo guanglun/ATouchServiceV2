@@ -80,11 +80,25 @@ public class TCPServer {
 
 
     public TCPServer(int port, OnReceiveListener onReceivedListener) {
-        try {
-            serverSocket = new ServerSocket(port);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+
+        while(true)
+        {
+            try {
+                serverSocket = new ServerSocket(port);
+                break;
+            } catch (IOException ex) {
+                //ex.printStackTrace();
+            }
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
+
+
         if (serverSocket == null) {
             return;
         }
