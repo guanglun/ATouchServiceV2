@@ -91,7 +91,7 @@ public class ATouchAgent extends Thread {
             }
         }
         );
-//
+
 //        try {
 //
 //            int t1 = atouch.down(Touch.TOUCH_NORMAL,100,1000,0,0,0);
