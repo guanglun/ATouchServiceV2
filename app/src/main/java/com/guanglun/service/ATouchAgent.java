@@ -10,6 +10,7 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 
+import com.guanglun.service.DBManager.DBControlMapUnit;
 import com.guanglun.service.compat.InputManagerWrapper;
 import com.guanglun.service.util.AutoTouch;
 import com.guanglun.service.util.DeviceMgmt;
@@ -84,6 +85,8 @@ public class ATouchAgent extends Thread {
 
     @Override
     public void run() {
+
+
         AutoTouch atouch = new AutoTouch(new AutoTouch.TouchCallback() {
             @Override
             public void onTouch(MotionEvent event) {

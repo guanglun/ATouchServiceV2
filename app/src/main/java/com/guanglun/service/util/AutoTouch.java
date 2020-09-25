@@ -5,6 +5,8 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 
+import com.guanglun.service.DBManager.DBControlMapUnit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,7 @@ public class AutoTouch {
     private MotionEvent event;
 
     private Thread threadTouch = null;
+
 
     public interface TouchCallback {
         void onTouch(MotionEvent event);

@@ -1,5 +1,7 @@
 package com.guanglun.service.util;
 
+import com.guanglun.service.DBManager.MapUnit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -417,448 +419,476 @@ public class ProcKeyboard {
             te_medicine = -1,te_reload = -1,te_save = -1,te_sprint = -1,te_follow = -1,te_pick = -1,
             te_ride = -1,te_pick1 = -1,te_pick2 = -1,te_pick3 = -1;
 
-    void procKB(byte[] buf, int len)
-    {
+    public boolean procKB(byte[] buf, int len) {
 
         Touch touch = new Touch();
 
+        if(mgmt.maplist == null)
+        {
+            return false;
+        }
+
+
         getEvent(buf, len);
 
-        for (KBEvent event:mapKB.values())
-        {
-            /**移动部分 start**/
-            //Log.i("DEBUG0", "Event:" + pNode->event + " Code:" + pNode->code);
-
-            if (event.code == KB_W)
+        for (KBEvent event : mapKB.values()) {
+            MapUnit m = null;
+            for(MapUnit map : mgmt.maplist)
             {
-                if (event.event == EVENT_K_DOWN)
+                if(map.KeyCode == event.code)
                 {
-                    move_y -= MOVE_STEP;
+                    m = map;
+
+                    if (m.MFV == MapUnit.MFV_NORMAL) {
+                        if(m.FV0 == MapUnit.FV0_NORMAL_NORMAL)
+                        {
+                            if (event.event == EVENT_K_DOWN && m.id == -1) {
+                                touch.startX = m.PX;
+                                touch.startY = m.PY;
+                                touch.type = Touch.TOUCH_NORMAL;
+
+                                m.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+                            } else if (event.event == EVENT_K_UP && m.id != -1) {
+                                mgmt.atouch.up(m.id);
+                                m.id = -1;
+                            }
+                        }else{
+                            if (event.event == EVENT_K_DOWN) {
+                                if(m.id == -1) {
+                                    touch.startX = m.PX;
+                                    touch.startY = m.PY;
+                                    touch.type = Touch.TOUCH_NORMAL;
+
+                                    m.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+                                }else{
+                                    mgmt.atouch.up(m.id);
+                                    m.id = -1;
+                                }
+                            }
+                        }
+                    }
                 }
-                else if (event.event == EVENT_K_UP)
-                {
-                    move_y += MOVE_STEP;
-                }
+
             }
 
-            if (event.code == KB_S)
-            {
-                if (event.event == EVENT_K_DOWN)
-                {
-                    move_y += MOVE_STEP;
-                }
-                else if (event.event == EVENT_K_UP)
-                {
-                    move_y -= MOVE_STEP;
-                }
-            }
 
-            if (event.code == KB_A)
-            {
-                if (event.event == EVENT_K_DOWN)
-                {
-                    move_x -= MOVE_STEP;
-                }
-                else if (event.event == EVENT_K_UP)
-                {
-                    move_x += MOVE_STEP;
-                }
-            }
 
-            if (event.code == KB_D)
-            {
-                if (event.event == EVENT_K_DOWN)
-                {
-                    move_x += MOVE_STEP;
-                }
-                else if (event.event == EVENT_K_UP)
-                {
-                    move_x -= MOVE_STEP;
-                }
-            }
 
-            if (event.code == KB_LEFT_SHIFT)
-            {
-                if (event.event == EVENT_K_DOWN)
-                {
-                    is_left_shift_down = true;
-                }
-                else if (event.event == EVENT_K_UP)
-                {
-                    is_left_shift_down = false;
-                }
-            }
-            /**移动部分 end**/
-
-            if (event.code == KB_1)
-            {
-                if (event.event == EVENT_K_DOWN && te_pick1 == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N51_Pick1X;
-                    touch.startY = mgmt.s_pubg.N52_Pick1Y;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_pick1 = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-                }
-                else if (event.event == EVENT_K_UP && te_pick1 != -1)
-                {
-                    mgmt.atouch.up(te_pick1);
-                    te_pick1 = -1;
-                }
-            }
-
-            if (event.code == KB_2)
-            {
-                if (event.event == EVENT_K_DOWN && te_pick2 == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N53_Pick2X;
-                    touch.startY = mgmt.s_pubg.N54_Pick2Y;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_pick2 = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-                }
-                else if (event.event == EVENT_K_UP && te_pick2 != -1)
-                {
-                    mgmt.atouch.up(te_pick2);
-                    te_pick2 = -1;
-                }
-            }
-
-            if (event.code == KB_3)
-            {
-                if (event.event == EVENT_K_DOWN && te_pick3 == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N55_Pick3X;
-                    touch.startY = mgmt.s_pubg.N56_Pick3Y;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_pick3 = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_pick3 != -1)
-                {
-                    mgmt.atouch.up(te_pick3);
-                    te_pick3 = -1;
-                }
-            }
-
-            if (event.code == KB_Q)
-            {
-                if (event.event == EVENT_K_DOWN && te_arms_left == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N19_ArmsLeftX;
-                    touch.startY = mgmt.s_pubg.N20_ArmsLeftY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_arms_left = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_arms_left != -1)
-                {
-                    mgmt.atouch.up(te_arms_left);
-                    te_arms_left = -1;
-                }
-            }
-
-            if (event.code == KB_E)
-            {
-                if (event.event == EVENT_K_DOWN && te_arms_right == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N21_ArmsRightX;
-                    touch.startY = mgmt.s_pubg.N22_ArmsRightY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_arms_right = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_arms_right != -1)
-                {
-                    mgmt.atouch.up(te_arms_right);
-                    te_arms_right = -1;
-                }
-            }
-
-            if (event.code == KB_SPACE)
-            {
-                if (event.event == EVENT_K_DOWN && te_jump == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N7_JumpX;
-                    touch.startY = mgmt.s_pubg.N8_JumpY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_jump = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_jump != -1)
-                {
-                    mgmt.atouch.up(te_jump);
-                    te_jump = -1;
-                }
-            }
-
-            if (event.code == KB_LEFT_ALT)
-            {
-                if (event.event == EVENT_K_DOWN && te_squat == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N9_SquatX;
-                    touch.startY = mgmt.s_pubg.N10_SquatY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_squat = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_squat != -1)
-                {
-                    mgmt.atouch.up(te_squat);
-                    te_squat = -1;
-                }
-            }
-
-            if (event.code == KB_LEFT_CTRL)
-            {
-                if (event.event == EVENT_K_DOWN && te_lie == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N11_LieX;
-                    touch.startY = mgmt.s_pubg.N12_LieY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_lie = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_lie != -1)
-                {
-                    mgmt.atouch.up(te_lie);
-                    te_lie = -1;
-                }
-            }
-
-            if (event.code == KB_B)
-            {
-                if (event.event == EVENT_K_DOWN && te_package == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N17_PackageX;
-                    touch.startY = mgmt.s_pubg.N18_PackageY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_package = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_package != -1)
-                {
-                    mgmt.atouch.up(te_package);
-                    te_package = -1;
-                }
-            }
-
-            if (event.code == KB_M)
-            {
-                if (event.event == EVENT_K_DOWN && te_map == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N23_MapX;
-                    touch.startY = mgmt.s_pubg.N24_MapY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_map = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_map != -1)
-                {
-                    mgmt.atouch.up(te_map);
-                    te_map = -1;
-                }
-            }
-
-            if (event.code == KB_R)
-            {
-                if (event.event == EVENT_K_DOWN && te_reload == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N39_ReloadX;
-                    touch.startY = mgmt.s_pubg.N40_ReloadY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_reload = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_reload != -1)
-                {
-                    mgmt.atouch.up(te_reload);
-                    te_reload = -1;
-                }
-            }
-
-            if (event.code == KB_Z)
-            {
-                if (event.event == EVENT_K_DOWN && te_drive == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N31_DriveX;
-                    touch.startY = mgmt.s_pubg.N32_DriveY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_drive = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_drive != -1)
-                {
-                    mgmt.atouch.up(te_drive);
-                    te_drive = -1;
-                }
-            }
-
-            if (event.code == KB_X)
-            {
-                if (event.event == EVENT_K_DOWN && te_ride == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N49_RideX;
-                    touch.startY = mgmt.s_pubg.N50_RideY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_ride = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_ride != -1)
-                {
-                    mgmt.atouch.up(te_ride);
-                    te_ride = -1;
-                }
-            }
-
-            if (event.code == KB_C)
-            {
-                if (event.event == EVENT_K_DOWN && te_getoff == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N33_GetOffX;
-                    touch.startY = mgmt.s_pubg.N34_GetOffY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_getoff = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_getoff != -1)
-                {
-                    mgmt.atouch.up(te_getoff);
-                    te_getoff = -1;
-                }
-            }
-
-            if (event.code == KB_T)
-            {
-                if (event.event == EVENT_K_DOWN && te_check_package == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N27_CheckPackageX;
-                    touch.startY = mgmt.s_pubg.N28_CheckPackageY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_check_package = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_check_package != -1)
-                {
-                    mgmt.atouch.up(te_check_package);
-                    te_check_package = -1;
-                }
-            }
-
-            if (event.code == KB_H)
-            {
-                if (event.event == EVENT_K_DOWN && te_save == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N41_SaveX;
-                    touch.startY = mgmt.s_pubg.N42_SaveY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_save = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_save != -1)
-                {
-                    mgmt.atouch.up(te_save);
-                    te_save = -1;
-                }
-            }
-
-            if (event.code == KB_G)
-            {
-                if (event.event == EVENT_K_DOWN && te_medicine == -1)
-                {
-                    touch.startX = mgmt.s_pubg.N37_MedicineX;
-                    touch.startY = mgmt.s_pubg.N38_MedicineY;
-                    touch.type = Touch.TOUCH_NORMAL;
-
-                    te_medicine = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-                }
-                else if (event.event == EVENT_K_UP && te_medicine != -1)
-                {
-                    mgmt.atouch.up(te_medicine);
-                    te_medicine = -1;
-                }
-            }
-
-            if (event.code == KB_F)
-            {
-                if (event.event == EVENT_K_DOWN)
-                {
-                    mgmt.procMouse.set_watch_status(true);
-                }
-                else if (event.event == EVENT_K_UP)
-                {
-                    mgmt.procMouse.set_watch_status(false);
-                }
-            }
         }
 
-        /**移动部分 start**/
-
-        //Log.i("DEBUG2", "MouseX:" + move_x + " MouseY:" + move_y);
-        if ((move_x != mgmt.s_pubg.N5_MoveX || move_y != mgmt.s_pubg.N6_MoveY) && te_move == -1)
         {
-            if (is_left_shift_down && move_y == mgmt.s_pubg.N6_MoveY - MOVE_STEP && move_x == mgmt.s_pubg.N5_MoveX) //shift
-            {
-                touch.startX = mgmt.s_pubg.N5_MoveX;
-                touch.startY = mgmt.s_pubg.N6_MoveY;
-                touch.type = Touch.TOUCH_MOVE_NORMAL;
-                touch.endX = mgmt.s_pubg.N43_SprintX;
-                touch.endY = mgmt.s_pubg.N44_SprintY;
-                touch.step = 2;
-            }
-            else
-            {
-                touch.startX = mgmt.s_pubg.N5_MoveX;
-                touch.startY = mgmt.s_pubg.N6_MoveY;
-                touch.type = Touch.TOUCH_MOVE_NORMAL;
-                touch.endX = move_x;
-                touch.endY = move_y;
-                touch.step = 2;
-            }
-
-            te_move = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//            //Log.i("DEBUG0", "Event:" + pNode->event + " Code:" + pNode->code);
+//
+//            if (event.code == KB_W)
+//            {
+//                if (event.event == EVENT_K_DOWN)
+//                {
+//                    move_y -= MOVE_STEP;
+//                }
+//                else if (event.event == EVENT_K_UP)
+//                {
+//                    move_y += MOVE_STEP;
+//                }
+//            }
+//
+//            if (event.code == KB_S)
+//            {
+//                if (event.event == EVENT_K_DOWN)
+//                {
+//                    move_y += MOVE_STEP;
+//                }
+//                else if (event.event == EVENT_K_UP)
+//                {
+//                    move_y -= MOVE_STEP;
+//                }
+//            }
+//
+//            if (event.code == KB_A)
+//            {
+//                if (event.event == EVENT_K_DOWN)
+//                {
+//                    move_x -= MOVE_STEP;
+//                }
+//                else if (event.event == EVENT_K_UP)
+//                {
+//                    move_x += MOVE_STEP;
+//                }
+//            }
+//
+//            if (event.code == KB_D)
+//            {
+//                if (event.event == EVENT_K_DOWN)
+//                {
+//                    move_x += MOVE_STEP;
+//                }
+//                else if (event.event == EVENT_K_UP)
+//                {
+//                    move_x -= MOVE_STEP;
+//                }
+//            }
+//
+//            if (event.code == KB_LEFT_SHIFT)
+//            {
+//                if (event.event == EVENT_K_DOWN)
+//                {
+//                    is_left_shift_down = true;
+//                }
+//                else if (event.event == EVENT_K_UP)
+//                {
+//                    is_left_shift_down = false;
+//                }
+//            }
+//
+//            if (event.code == KB_1)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_pick1 == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N51_Pick1X;
+//                    touch.startY = mgmt.s_pubg.N52_Pick1Y;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_pick1 = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//                }
+//                else if (event.event == EVENT_K_UP && te_pick1 != -1)
+//                {
+//                    mgmt.atouch.up(te_pick1);
+//                    te_pick1 = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_2)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_pick2 == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N53_Pick2X;
+//                    touch.startY = mgmt.s_pubg.N54_Pick2Y;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_pick2 = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//                }
+//                else if (event.event == EVENT_K_UP && te_pick2 != -1)
+//                {
+//                    mgmt.atouch.up(te_pick2);
+//                    te_pick2 = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_3)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_pick3 == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N55_Pick3X;
+//                    touch.startY = mgmt.s_pubg.N56_Pick3Y;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_pick3 = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_pick3 != -1)
+//                {
+//                    mgmt.atouch.up(te_pick3);
+//                    te_pick3 = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_Q)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_arms_left == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N19_ArmsLeftX;
+//                    touch.startY = mgmt.s_pubg.N20_ArmsLeftY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_arms_left = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_arms_left != -1)
+//                {
+//                    mgmt.atouch.up(te_arms_left);
+//                    te_arms_left = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_E)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_arms_right == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N21_ArmsRightX;
+//                    touch.startY = mgmt.s_pubg.N22_ArmsRightY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_arms_right = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_arms_right != -1)
+//                {
+//                    mgmt.atouch.up(te_arms_right);
+//                    te_arms_right = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_SPACE)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_jump == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N7_JumpX;
+//                    touch.startY = mgmt.s_pubg.N8_JumpY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_jump = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_jump != -1)
+//                {
+//                    mgmt.atouch.up(te_jump);
+//                    te_jump = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_LEFT_ALT)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_squat == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N9_SquatX;
+//                    touch.startY = mgmt.s_pubg.N10_SquatY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_squat = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_squat != -1)
+//                {
+//                    mgmt.atouch.up(te_squat);
+//                    te_squat = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_LEFT_CTRL)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_lie == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N11_LieX;
+//                    touch.startY = mgmt.s_pubg.N12_LieY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_lie = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_lie != -1)
+//                {
+//                    mgmt.atouch.up(te_lie);
+//                    te_lie = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_B)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_package == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N17_PackageX;
+//                    touch.startY = mgmt.s_pubg.N18_PackageY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_package = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_package != -1)
+//                {
+//                    mgmt.atouch.up(te_package);
+//                    te_package = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_M)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_map == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N23_MapX;
+//                    touch.startY = mgmt.s_pubg.N24_MapY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_map = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_map != -1)
+//                {
+//                    mgmt.atouch.up(te_map);
+//                    te_map = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_R)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_reload == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N39_ReloadX;
+//                    touch.startY = mgmt.s_pubg.N40_ReloadY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_reload = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_reload != -1)
+//                {
+//                    mgmt.atouch.up(te_reload);
+//                    te_reload = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_Z)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_drive == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N31_DriveX;
+//                    touch.startY = mgmt.s_pubg.N32_DriveY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_drive = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_drive != -1)
+//                {
+//                    mgmt.atouch.up(te_drive);
+//                    te_drive = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_X)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_ride == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N49_RideX;
+//                    touch.startY = mgmt.s_pubg.N50_RideY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_ride = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_ride != -1)
+//                {
+//                    mgmt.atouch.up(te_ride);
+//                    te_ride = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_C)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_getoff == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N33_GetOffX;
+//                    touch.startY = mgmt.s_pubg.N34_GetOffY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_getoff = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_getoff != -1)
+//                {
+//                    mgmt.atouch.up(te_getoff);
+//                    te_getoff = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_T)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_check_package == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N27_CheckPackageX;
+//                    touch.startY = mgmt.s_pubg.N28_CheckPackageY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_check_package = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_check_package != -1)
+//                {
+//                    mgmt.atouch.up(te_check_package);
+//                    te_check_package = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_H)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_save == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N41_SaveX;
+//                    touch.startY = mgmt.s_pubg.N42_SaveY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_save = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_save != -1)
+//                {
+//                    mgmt.atouch.up(te_save);
+//                    te_save = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_G)
+//            {
+//                if (event.event == EVENT_K_DOWN && te_medicine == -1)
+//                {
+//                    touch.startX = mgmt.s_pubg.N37_MedicineX;
+//                    touch.startY = mgmt.s_pubg.N38_MedicineY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_medicine = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//                }
+//                else if (event.event == EVENT_K_UP && te_medicine != -1)
+//                {
+//                    mgmt.atouch.up(te_medicine);
+//                    te_medicine = -1;
+//                }
+//            }
+//
+//            if (event.code == KB_F)
+//            {
+//                if (event.event == EVENT_K_DOWN)
+//                {
+//                    mgmt.procMouse.set_watch_status(true);
+//                }
+//                else if (event.event == EVENT_K_UP)
+//                {
+//                    mgmt.procMouse.set_watch_status(false);
+//                }
+//            }
         }
-        else if (move_x == mgmt.s_pubg.N5_MoveX && move_y == mgmt.s_pubg.N6_MoveY && te_move != -1)
+
         {
-            mgmt.atouch.move(te_move,mgmt.s_pubg.N5_MoveX, mgmt.s_pubg.N6_MoveY - MOVE_STEP);
-
-            try {
-                Thread.sleep(60);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            mgmt.atouch.up(te_move);
-            te_move = -1;
+//            if ((move_x != mgmt.s_pubg.N5_MoveX || move_y != mgmt.s_pubg.N6_MoveY) && te_move == -1) {
+//                if (is_left_shift_down && move_y == mgmt.s_pubg.N6_MoveY - MOVE_STEP && move_x == mgmt.s_pubg.N5_MoveX) //shift
+//                {
+//                    touch.startX = mgmt.s_pubg.N5_MoveX;
+//                    touch.startY = mgmt.s_pubg.N6_MoveY;
+//                    touch.type = Touch.TOUCH_MOVE_NORMAL;
+//                    touch.endX = mgmt.s_pubg.N43_SprintX;
+//                    touch.endY = mgmt.s_pubg.N44_SprintY;
+//                    touch.step = 2;
+//                } else {
+//                    touch.startX = mgmt.s_pubg.N5_MoveX;
+//                    touch.startY = mgmt.s_pubg.N6_MoveY;
+//                    touch.type = Touch.TOUCH_MOVE_NORMAL;
+//                    touch.endX = move_x;
+//                    touch.endY = move_y;
+//                    touch.step = 2;
+//                }
+//
+//                te_move = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+//            } else if (move_x == mgmt.s_pubg.N5_MoveX && move_y == mgmt.s_pubg.N6_MoveY && te_move != -1) {
+//                mgmt.atouch.move(te_move, mgmt.s_pubg.N5_MoveX, mgmt.s_pubg.N6_MoveY - MOVE_STEP);
+//
+//                try {
+//                    Thread.sleep(60);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                mgmt.atouch.up(te_move);
+//                te_move = -1;
+//            }
         }
-        else if (te_move != -1)
-        {
-            if (is_left_shift_down && move_y == mgmt.s_pubg.N6_MoveY - MOVE_STEP && move_x == mgmt.s_pubg.N5_MoveX) //shift
-            {
-                mgmt.atouch.move(te_move,mgmt.s_pubg.N43_SprintX, mgmt.s_pubg.N44_SprintY);
-
-            }
-            else
-            {
-                mgmt.atouch.move(te_move,move_x, move_y);
-            }
-        }
-        /**移动部分 end**/
 
         List<Byte> removeList = new ArrayList<>();
         for(KBEvent event:mapKB.values())
@@ -874,6 +904,11 @@ public class ProcKeyboard {
         {
             mapKB.remove(code);
         }
+
+        return true;
+
     }
+
+
 
 }

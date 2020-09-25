@@ -4,9 +4,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.guanglun.service.DBManager.DBControlMapUnit;
+import com.guanglun.service.DBManager.MapUnit;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.List;
 
 public class DeviceMgmt {
 
@@ -18,11 +22,14 @@ public class DeviceMgmt {
     public ADBRecv adbRecv = new ADBRecv();
     public PUBG s_pubg = new PUBG();
 
-
+    public List<MapUnit> maplist = null;
     public ProcKeyboard procKB = new ProcKeyboard();
     public ProcMouse procMouse = new ProcMouse();
 
     public AutoTouch atouch;
+
+    public DBControlMapUnit dbControl = new DBControlMapUnit();
+
     public DeviceMgmt(AutoTouch atouch)
     {
         this.atouch = atouch;

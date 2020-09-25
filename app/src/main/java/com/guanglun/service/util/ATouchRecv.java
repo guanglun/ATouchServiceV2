@@ -2,6 +2,8 @@ package com.guanglun.service.util;
 
 import android.util.Log;
 
+import com.guanglun.service.DBManager.MapUnit;
+
 public class ATouchRecv {
 
     private int  receive_atouch_flag = 0, data_atouch_len = 0;
@@ -103,10 +105,16 @@ public class ATouchRecv {
         switch (buf[0])
         {
             case 0x01:
-                Log.i(EasyTool.TAG, "receive keymap");
+
                 bytes = new byte[len-1];
                 System.arraycopy(buf,1,bytes,0,len-1);
-                mgmt.s_pubg.setPUBG(bytes);
+                String map_name = new String(bytes);
+
+                mgmt.maplist = mgmt.dbControl.getRawByName(map_name);
+                if(mgmt.maplist != null)
+                {
+                    Log.i(EasyTool.TAG, "receive keymap " + map_name);
+                }
                 break;
             case 0x02:
                 bytes = new byte[len-1];
