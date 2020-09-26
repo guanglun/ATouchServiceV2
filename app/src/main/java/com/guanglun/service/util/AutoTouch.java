@@ -188,7 +188,7 @@ public class AutoTouch {
 
         }
 
-        Log.i(EasyTool.TAG, "down "+id+" " + event.getAction());
+        //Log.i(EasyTool.TAG, "down "+id+" " + event.getAction());
 
         touch.id = id;
         cb.onTouch(event);
@@ -270,7 +270,7 @@ public class AutoTouch {
 
             }
 
-            Log.i(EasyTool.TAG, "up "+id+" " + event.getAction() + " " + size);
+            //Log.i(EasyTool.TAG, "up "+id+" " + event.getAction() + " " + size);
 
             mapTouch.remove(id);
 
