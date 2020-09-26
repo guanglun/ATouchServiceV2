@@ -111,10 +111,10 @@ public class ATouchRecv {
                 String map_name = new String(bytes);
 
                 mgmt.maplist = mgmt.dbControl.getRawByName(map_name);
-                if(mgmt.maplist != null)
-                {
-                    Log.i(EasyTool.TAG, "receive keymap " + map_name);
-                }
+//                if(mgmt.maplist != null)
+//                {
+//                    Log.i(EasyTool.TAG, "receive keymap " + map_name);
+//                }
                 break;
             case 0x02:
                 bytes = new byte[len-1];

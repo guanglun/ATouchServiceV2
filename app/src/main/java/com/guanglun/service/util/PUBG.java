@@ -108,6 +108,5 @@ public class PUBG {
         SetPick2(EasyTool.byte2int(buf[i++],buf[i++]),EasyTool.byte2int(buf[i++],buf[i++]));
         SetPick3(EasyTool.byte2int(buf[i++],buf[i++]),EasyTool.byte2int(buf[i++],buf[i++]));
 
-        mgmt.procKB.setMoveXY(N5_MoveX,N6_MoveY);
     }
 }

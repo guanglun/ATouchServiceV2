@@ -1,14 +1,14 @@
 package com.guanglun.service.util;
 
+import android.util.Log;
+
+import com.guanglun.service.DBManager.MapUnit;
+
 import static com.guanglun.service.util.EasyTool.limit;
 
 public class ProcMouse {
     private static final int FACE_STEP  = 400;
     private static final int WATCH_STEP = 400;
-
-    private boolean is_watch = false;
-    private int te_face = -1;
-    private int face_x = 0, face_y = 0;
 
     private DeviceMgmt mgmt;
 
@@ -17,174 +17,351 @@ public class ProcMouse {
         this.mgmt = mgmt;
     }
 
-    public void reset()
-    {
-        if(te_face != -1)
-        {
-            mgmt.atouch.up(te_face);
-            te_face = -1;
-        }
-    }
+
+    final static private int MOUSE_CODE_L = 301;
+    final static private int MOUSE_CODE_R = 302;
+    final static private int MOUSE_CODE_M = 303;
 
     private int te_attack = -1,te_aim = -1;
 
-    void procMouse(byte[] buf, int len)
+    private byte[] temp = new byte[200],temp2 = new byte[10];
+
+    public void changeMode(MapUnit map)
     {
-
         Touch touch = new Touch();
-        byte[] temp = new byte[200],temp2 = new byte[10];
-
-        if ((te_face == -1) && ((buf[0] & 0x04) == 0x04))
+        if(map.face == null)
         {
-
-            if (!is_watch)
-            {
-                face_x = mgmt.s_pubg.N13_FaceX;
-                face_y = mgmt.s_pubg.N14_FaceY;
-                touch.startX = mgmt.s_pubg.N13_FaceX;
-                touch.startY = mgmt.s_pubg.N14_FaceY;
-                touch.type = Touch.TOUCH_NORMAL;
-            }
-            else
-            {
-                face_x = mgmt.s_pubg.N15_WatchX;
-                face_y = mgmt.s_pubg.N16_WatchY;
-                touch.startX = mgmt.s_pubg.N15_WatchX;
-                touch.startY = mgmt.s_pubg.N16_WatchY;
-                touch.type = Touch.TOUCH_NORMAL;
-            }
-
-            te_face = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-            temp2[0] = 0x00;
-            byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x02, temp2, 1);
-            mgmt.atouchSend(bytes);
-        }
-        else if ((te_face != -1) && ((buf[0] & 0x04) == 0x04))
-        {
-
-            mgmt.atouch.up(te_face);
-            te_face = -1;
-
-            temp2[0] = 0x01;
-            byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x02, temp2, 1);
-            mgmt.atouchSend(bytes);
+            map.face = new Face();
+            map.face.face_x = map.PX;
+            map.face.face_y = map.PY;
         }
 
-        if (te_face != -1)
-        {
 
-            face_x += buf[1];
-            face_y += buf[2];
 
-            //LOG("%d\t%d\t%d\t%d\r\n",face_x,face_y,(signed char)buf[1],(signed char)buf[2]);
-
-            if (!is_watch)
+            if(map.id == -1)
             {
-                if ( (face_x < (mgmt.s_pubg.N13_FaceX - FACE_STEP)) || (face_x > (mgmt.s_pubg.N13_FaceX + FACE_STEP)) ||
-                        (face_y < (mgmt.s_pubg.N14_FaceY - FACE_STEP)) || (face_y > (mgmt.s_pubg.N14_FaceY + FACE_STEP)))
-                {
-                    mgmt.atouch.up(te_face);
-                    te_face = -1;
-                    face_x = mgmt.s_pubg.N13_FaceX;
-                    face_y = mgmt.s_pubg.N14_FaceY;
-                    face_x += buf[1];
-                    face_y += buf[2];
-                    touch.startX = mgmt.s_pubg.N13_FaceX;
-                    touch.startY = mgmt.s_pubg.N14_FaceY;
-                    touch.type = Touch.TOUCH_NORMAL;
+                map.face.face_x = map.PX;
+                map.face.face_y = map.PY;
+                touch.startX = map.PX;
+                touch.startY = map.PY;
+                touch.type = Touch.TOUCH_NORMAL;
 
-                    te_face= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+                map.id= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+
+                temp2[0] = 0x00;
+                byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x02, temp2, 1);
+                mgmt.atouchSend(bytes);
+
+                map.face.is_mouse = false;
+            }else
+            {
+                mgmt.atouch.up(map.id);
+                map.id = -1;
+                temp2[0] = 0x01;
+                byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x02, temp2, 1);
+                mgmt.atouchSend(bytes);
+
+                map.face.is_mouse = true;
+            }
+
+    }
+
+    public boolean procMouse(byte[] buf, int len)
+    {
+        boolean isMouse;
+        Touch touch = new Touch();
+        if (mgmt.maplist == null) {
+            return false;
+        }
+
+        for (MapUnit map : mgmt.maplist) {
+            if(map.DeviceValue == MapUnit.DEVICE_VALUE_MOUSE && map.MFV == MapUnit.MFV_NORMAL)
+            {
+                isMouse = true;
+
+                for (MapUnit m : mgmt.maplist) {
+                    if(m.MFV == MapUnit.MFV_MOUSE && m.face != null)
+                    {
+                        if(m.face != null)
+                        {
+                            if(m.face.is_mouse)
+                            {
+                                isMouse = false;
+                            }
+                        }
+                    }
                 }
-            }
-            else
+
+                if(isMouse) {
+                    if (map.FV0 == MapUnit.FV0_NORMAL_NORMAL) {
+                        if (map.KeyCode == MOUSE_CODE_L) {
+                            if ((map.id == -1) && ((buf[0] & 0x01) == 0x01)) {
+                                touch.startX = map.PX;
+                                touch.startY = map.PY;
+                                touch.type = Touch.TOUCH_NORMAL;
+
+                                map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+
+                            } else if ((map.id != -1) && ((buf[0] & 0x01) == 0x00)) {
+
+                                mgmt.atouch.up(map.id);
+                                map.id = -1;
+                            }
+                        } else if (map.KeyCode == MOUSE_CODE_R) {
+                            if ((map.id == -1) && ((buf[0] & 0x02) == 0x02)) {
+                                touch.startX = map.PX;
+                                touch.startY = map.PY;
+                                touch.type = Touch.TOUCH_NORMAL;
+
+                                map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+
+                            } else if ((map.id != -1) && ((buf[0] & 0x02) == 0x00)) {
+
+                                mgmt.atouch.up(map.id);
+                                map.id = -1;
+                            }
+                        } else if (map.KeyCode == MOUSE_CODE_M) {
+                            if ((map.id == -1) && ((buf[0] & 0x04) == 0x04)) {
+                                touch.startX = map.PX;
+                                touch.startY = map.PY;
+                                touch.type = Touch.TOUCH_NORMAL;
+
+                                map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+
+                            } else if ((map.id != -1) && ((buf[0] & 0x04) == 0x00)) {
+
+                                mgmt.atouch.up(map.id);
+                                map.id = -1;
+                            }
+                        }
+                    } else if (map.FV0 == MapUnit.FV0_NORMAL_LONG) {
+                        if (map.KeyCode == MOUSE_CODE_L) {
+                            if ((buf[0] & 0x01) == 0x01) {
+                                if (map.id == -1) {
+                                    touch.startX = map.PX;
+                                    touch.startY = map.PY;
+                                    touch.type = Touch.TOUCH_NORMAL;
+
+                                    map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+                                } else {
+                                    mgmt.atouch.up(map.id);
+                                    map.id = -1;
+                                }
+                            }
+                        } else if (map.KeyCode == MOUSE_CODE_R) {
+                            if ((buf[0] & 0x02) == 0x02) {
+                                if (map.id == -1) {
+                                    touch.startX = map.PX;
+                                    touch.startY = map.PY;
+                                    touch.type = Touch.TOUCH_NORMAL;
+
+                                    map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+                                } else {
+                                    mgmt.atouch.up(map.id);
+                                    map.id = -1;
+                                }
+                            }
+                        } else if (map.KeyCode == MOUSE_CODE_M) {
+                            if ((buf[0] & 0x04) == 0x04) {
+                                if (map.id == -1) {
+                                    touch.startX = map.PX;
+                                    touch.startY = map.PY;
+                                    touch.type = Touch.TOUCH_NORMAL;
+
+                                    map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+                                } else {
+                                    mgmt.atouch.up(map.id);
+                                    map.id = -1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }else if(map.MFV == MapUnit.MFV_MOUSE)
             {
+                if(map.face == null)
+                {
+                    map.face = new Face();
+                    map.face.face_x = map.PX;
+                    map.face.face_y = map.PY;
+                }
 
-                face_x = limit(face_x, mgmt.s_pubg.N15_WatchX - WATCH_STEP*2, mgmt.s_pubg.N15_WatchX + WATCH_STEP);
-                face_y = limit(face_y, mgmt.s_pubg.N16_WatchY - WATCH_STEP, mgmt.s_pubg.N16_WatchY + WATCH_STEP);
-            }
+                if(map.face.is_mouse)
+                {
+                    byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x01, buf, 4);
+                    mgmt.atouchSend(bytes);
 
-            mgmt.atouch.move(te_face,face_x, face_y);
+                }else{
 
-            if ((te_attack == -1) && ((buf[0] & 0x01) == 0x01))
-            {
-                touch.startX = mgmt.s_pubg.N3_AttackX;
-                touch.startY = mgmt.s_pubg.N4_AttackY;
-                touch.type = Touch.TOUCH_NORMAL;
+                    if (map.KeyCode == MOUSE_CODE_L) {
+                        if ((buf[0] & 0x01) == 0x01) {
+                            changeMode(map);
+                        }
+                    } else if (map.KeyCode == MOUSE_CODE_R) {
+                        if ((buf[0] & 0x02) == 0x02) {
+                            changeMode(map);
+                        }
+                    } else if (map.KeyCode == MOUSE_CODE_M) {
+                        if ((buf[0] & 0x04) == 0x04) {
+                            changeMode(map);
+                        }
+                    }
 
-                te_attack = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+                    map.face.face_x += buf[1];
+                    map.face.face_y += buf[2];
 
-            }
-            else if ((te_attack != -1) && ((buf[0] & 0x01) == 0x00))
-            {
+                    if (!map.face.is_watch)
+                    {
+                        if ( (map.face.face_x < (map.PX - FACE_STEP)) || (map.face.face_x > (map.PX + FACE_STEP)) ||
+                                (map.face.face_y < (map.PY - FACE_STEP)) || (map.face.face_y > (map.PY + FACE_STEP)))
+                        {
+                            mgmt.atouch.up(map.id);
+                            map.id = -1;
+                            map.face.face_x = map.PX;
+                            map.face.face_y = map.PY;
+                            map.face.face_x += buf[1];
+                            map.face.face_y += buf[2];
+                            touch.startX = map.PX;
+                            touch.startY = map.PY;
+                            touch.type = Touch.TOUCH_NORMAL;
 
-                mgmt.atouch.up(te_attack);
-                te_attack = -1;
-            }
+                            map.id= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+                        }
+                    }
+                    else
+                    {
+                        map.face.face_x = limit(map.face.face_x, map.FV1 - WATCH_STEP*2, map.FV1 + WATCH_STEP);
+                        map.face.face_y = limit(map.face.face_y, map.FV2 - WATCH_STEP, map.FV2 + WATCH_STEP);
+                    }
+                    mgmt.atouch.move(map.id,map.face.face_x, map.face.face_y);
+                }
 
-            if ((te_aim == -1) && ((buf[0] & 0x02) == 0x02))
-            {
-                touch.startX = mgmt.s_pubg.N25_AimX;
-                touch.startY = mgmt.s_pubg.N26_AimY;
-                touch.type = Touch.TOUCH_NORMAL;
-
-                te_aim = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-
-            }
-            else if ((te_aim != -1) && ((buf[0] & 0x02) == 0x00))
-            {
-                mgmt.atouch.up(te_aim);
-                te_aim = -1;
             }
         }
-        else
+
+//
+//        if (te_face != -1)
+//        {
+//
+//            face_x += buf[1];
+//            face_y += buf[2];
+//
+//            //LOG("%d\t%d\t%d\t%d\r\n",face_x,face_y,(signed char)buf[1],(signed char)buf[2]);
+//
+//            if (!is_watch)
+//            {
+//                if ( (face_x < (mgmt.s_pubg.N13_FaceX - FACE_STEP)) || (face_x > (mgmt.s_pubg.N13_FaceX + FACE_STEP)) ||
+//                        (face_y < (mgmt.s_pubg.N14_FaceY - FACE_STEP)) || (face_y > (mgmt.s_pubg.N14_FaceY + FACE_STEP)))
+//                {
+//                    mgmt.atouch.up(te_face);
+//                    te_face = -1;
+//                    face_x = mgmt.s_pubg.N13_FaceX;
+//                    face_y = mgmt.s_pubg.N14_FaceY;
+//                    face_x += buf[1];
+//                    face_y += buf[2];
+//                    touch.startX = mgmt.s_pubg.N13_FaceX;
+//                    touch.startY = mgmt.s_pubg.N14_FaceY;
+//                    touch.type = Touch.TOUCH_NORMAL;
+//
+//                    te_face= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//                }
+//            }
+//            else
+//            {
+//
+//                face_x = limit(face_x, mgmt.s_pubg.N15_WatchX - WATCH_STEP*2, mgmt.s_pubg.N15_WatchX + WATCH_STEP);
+//                face_y = limit(face_y, mgmt.s_pubg.N16_WatchY - WATCH_STEP, mgmt.s_pubg.N16_WatchY + WATCH_STEP);
+//            }
+//
+//            mgmt.atouch.move(te_face,face_x, face_y);
+//
+//            if ((te_attack == -1) && ((buf[0] & 0x01) == 0x01))
+//            {
+//                touch.startX = mgmt.s_pubg.N3_AttackX;
+//                touch.startY = mgmt.s_pubg.N4_AttackY;
+//                touch.type = Touch.TOUCH_NORMAL;
+//
+//                te_attack = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//            }
+//            else if ((te_attack != -1) && ((buf[0] & 0x01) == 0x00))
+//            {
+//
+//                mgmt.atouch.up(te_attack);
+//                te_attack = -1;
+//            }
+//
+//            if ((te_aim == -1) && ((buf[0] & 0x02) == 0x02))
+//            {
+//                touch.startX = mgmt.s_pubg.N25_AimX;
+//                touch.startY = mgmt.s_pubg.N26_AimY;
+//                touch.type = Touch.TOUCH_NORMAL;
+//
+//                te_aim = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+//
+//            }
+//            else if ((te_aim != -1) && ((buf[0] & 0x02) == 0x00))
+//            {
+//                mgmt.atouch.up(te_aim);
+//                te_aim = -1;
+//            }
+//        }
+//        else
+//        {
+//            byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x01, buf, 4);
+//            mgmt.atouchSend(bytes);
+//        }
+        return true;
+    }
+
+    void set_watch_status(MapUnit map,boolean isdown)
+    {
+        Touch touch = new Touch();
+        map.face.is_watch = isdown;
+        if (map.face.is_watch && map.id != -1)
         {
-            byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x01, buf, 4);
-            mgmt.atouchSend(bytes);
+            mgmt.atouch.up(map.id);
+
+            try {
+                Thread.sleep(60);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            map.face.face_x = map.FV1;
+            map.face.face_y = map.FV2;
+
+            touch.startX = map.FV1;
+            touch.startY = map.FV2;
+            touch.type = Touch.TOUCH_NORMAL;
+
+            map.id = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+        }
+        else if ((!map.face.is_watch) && map.id != -1)
+        {
+            mgmt.atouch.up(map.id);
+
+            try {
+                Thread.sleep(60);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            map.face.face_x = map.PX;
+            map.face.face_y = map.PY;
+
+            touch.startX = map.PX;
+            touch.startY = map.PY;
+            touch.type = Touch.TOUCH_NORMAL;
+
+            map.id = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
         }
     }
 
-    void set_watch_status(boolean isdown)
-    {
-        Touch touch = new Touch();
-        is_watch = isdown;
-        if (is_watch && te_face != -1)
-        {
-            mgmt.atouch.up(te_face);
-
-            try {
-                Thread.sleep(60);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            face_x = mgmt.s_pubg.N15_WatchX;
-            face_y = mgmt.s_pubg.N16_WatchY;
-
-            touch.startX = mgmt.s_pubg.N15_WatchX;
-            touch.startY = mgmt.s_pubg.N16_WatchY;
-            touch.type = Touch.TOUCH_NORMAL;
-
-            te_face= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-        }
-        else if ((!is_watch) && te_face != -1)
-        {
-            mgmt.atouch.up(te_face);
-
-            try {
-                Thread.sleep(60);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            face_x = mgmt.s_pubg.N13_FaceX;
-            face_y = mgmt.s_pubg.N14_FaceY;
-
-            touch.startX = mgmt.s_pubg.N13_FaceX;
-            touch.startY = mgmt.s_pubg.N14_FaceY;
-            touch.type = Touch.TOUCH_NORMAL;
-
-            te_face= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-        }
+    public class Face{
+        public boolean is_mouse = true;
+        public boolean is_watch = false;
+        public int face_x = 0, face_y = 0;
     }
 }
+
