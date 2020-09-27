@@ -110,6 +110,7 @@ public class ATouchRecv {
                 System.arraycopy(buf,1,bytes,0,len-1);
                 String map_name = new String(bytes);
 
+                mgmt.atouch.clear();
                 mgmt.maplist = mgmt.dbControl.getRawByName(map_name);
 //                if(mgmt.maplist != null)
 //                {

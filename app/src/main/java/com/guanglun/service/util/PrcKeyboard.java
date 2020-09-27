@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProcKeyboard {
+public class PrcKeyboard {
 
     private static final byte EVENT_K_DOWN = (byte) 0x00;
     private static final byte EVENT_K_UP = (byte) 0x01;
@@ -36,7 +36,7 @@ public class ProcKeyboard {
         this.mgmt = mgmt;
     }
 
-    private class KBEvent {
+    private static class KBEvent {
         int code;
         byte event;
 
@@ -46,7 +46,7 @@ public class ProcKeyboard {
         }
     }
 
-    void getEvent(byte[] buf, int len) {
+    void getEvent(byte[] buf) {
         int i = 0;
         KBEvent event;
         if ((buf[0] & (byte) 0x01) == (byte) 0x01) {
@@ -180,7 +180,7 @@ public class ProcKeyboard {
 
         for (i = 2; i < 8; i++) {
             if (buf[i] != (byte) 0x00) {
-                event = mapKB.get(buf[i]);
+                event = mapKB.get((int)buf[i]);
                 if (event != null) {
                     if (event.event == EVENT_K_DOWN) {
                         event.event = EVENT_K_KEEP;
@@ -206,15 +206,15 @@ public class ProcKeyboard {
         mapKBFlag.clear();
     }
 
-    public boolean procKB(byte[] buf, int len) {
+    public void procKB(byte[] buf) {
 
         Touch touch = new Touch();
 
         if (mgmt.maplist == null) {
-            return false;
+            return;
         }
 
-        getEvent(buf, len);
+        getEvent(buf);
 
         for (KBEvent event : mapKB.values()) {
             for (MapUnit map : mgmt.maplist) {
@@ -256,7 +256,7 @@ public class ProcKeyboard {
                                     mgmt.atouch.up(map.id);
                                     map.id = -1;
                                 }
-
+                                
                                 if(map.FV1 == MapUnit.FV1_NORMAL_MOUSE)
                                 {
                                     for (MapUnit m : mgmt.maplist)
@@ -277,7 +277,7 @@ public class ProcKeyboard {
                         map.slide.move_y = map.PY;
                     }
 
-                    Log.i(EasyTool.TAG, "code : " + event.code);
+                    //Log.i(EasyTool.TAG, "code : " + event.code);
 
                     //top
                     if (map.KeyCode == event.code) {
@@ -405,16 +405,14 @@ public class ProcKeyboard {
             }
         }
 
-        for (int code : removeList) {
+        for (Integer code : removeList) {
             mapKB.remove(code);
         }
-
-        return true;
 
     }
 
 
-    public class Slide {
+    public static class Slide {
         private int move_x, move_y;
         private boolean is_left_shift_down = false;
     }

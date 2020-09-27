@@ -91,7 +91,7 @@ public class ADBRecv {
                 {
                     bytes = new byte[len-1];
                     System.arraycopy(buf,1,bytes,0,len-1);
-                    mgmt.procKB.procKB(bytes,len-1);
+                    mgmt.procKB.procKB(bytes);
                 }
                 break;
 

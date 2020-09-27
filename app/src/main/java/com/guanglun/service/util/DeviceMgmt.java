@@ -1,9 +1,5 @@
 package com.guanglun.service.util;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-
 import com.guanglun.service.DBManager.DBControlMapUnit;
 import com.guanglun.service.DBManager.MapUnit;
 
@@ -23,12 +19,13 @@ public class DeviceMgmt {
     public PUBG s_pubg = new PUBG();
 
     public List<MapUnit> maplist = null;
-    public ProcKeyboard procKB = new ProcKeyboard();
+    public PrcKeyboard procKB = new PrcKeyboard();
     public ProcMouse procMouse = new ProcMouse();
 
     public AutoTouch atouch;
 
     public DBControlMapUnit dbControl = new DBControlMapUnit();
+
 
     public DeviceMgmt(AutoTouch atouch)
     {
@@ -49,11 +46,13 @@ public class DeviceMgmt {
 
                         if (atouchRecv.atouchRecv(buffer))
                         {
+                            atouch.clear();
                             socketATouch = socket;
                             osATouch = os;
                         }
 
                         if (adbRecv.adbRecv(buffer)) {
+                            atouch.clear();
                             socketADB = socket;
                             osADB = os;
                         }

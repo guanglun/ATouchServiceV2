@@ -39,6 +39,15 @@ public class AutoTouch {
         threadTouch.start();
     }
 
+    public void clear()
+    {
+        for(Touch touch : mapTouch.values())
+        {
+            up(touch.id);
+        }
+        mapTouch.clear();
+    }
+
     private Runnable touchRunnable = new Runnable() {
         @Override
         public synchronized void run() {

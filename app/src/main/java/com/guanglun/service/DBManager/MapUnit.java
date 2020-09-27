@@ -2,7 +2,7 @@ package com.guanglun.service.DBManager;
 
 import android.content.ContentValues;
 
-import com.guanglun.service.util.ProcKeyboard;
+import com.guanglun.service.util.PrcKeyboard;
 import com.guanglun.service.util.ProcMouse;
 
 public class MapUnit {
@@ -52,7 +52,7 @@ public class MapUnit {
 
     public int id = -1;
 
-    public ProcKeyboard.Slide slide = null;
+    public PrcKeyboard.Slide slide = null;
     public  ProcMouse.Face face = null;
 
     public MapUnit()
