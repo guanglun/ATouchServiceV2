@@ -324,6 +324,8 @@ public class PrcKeyboard {
                         }
                     }
                 } else if (map.MFV == MapUnit.MFV_MOUSE) {
+                    Log.i(EasyTool.TAG,map.toString());
+
                     if (map.KeyCode == event.code) {
                         if(event.event == EVENT_K_DOWN)
                         {

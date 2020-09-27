@@ -82,21 +82,25 @@ public class DeviceMgmt {
 
     }
 
-    public void atouchSend(byte[] buf)
+    public boolean atouchSend(byte[] buf)
     {
         if(socketATouch != null)
         {
             if(socketATouch.isConnected())
             {
-
                 try {
                     osATouch.write(buf);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
-
+            }else{
+                return false;
             }
+        }else{
+            return false;
         }
+        return true;
     }
 
     public void adbSend(byte[] buf)

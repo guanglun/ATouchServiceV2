@@ -4,16 +4,19 @@ import android.util.Log;
 
 import com.guanglun.service.DBManager.MapUnit;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import static com.guanglun.service.util.EasyTool.limit;
 
 public class ProcMouse {
-    private static final int FACE_STEP  = 400;
+
+    private static final int FACE_STEP = 400;
     private static final int WATCH_STEP = 400;
 
     private DeviceMgmt mgmt;
 
-    public void init(DeviceMgmt mgmt)
-    {
+    public void init(DeviceMgmt mgmt) {
         this.mgmt = mgmt;
     }
 
@@ -22,77 +25,96 @@ public class ProcMouse {
     final static private int MOUSE_CODE_R = 302;
     final static private int MOUSE_CODE_M = 303;
 
-    private int te_attack = -1,te_aim = -1;
+    public boolean is_mouse = true;
+    public boolean is_mouse_show = false;
 
-    private byte[] temp = new byte[200],temp2 = new byte[10];
+    private byte[] temp = new byte[10];
+    private int mouse_recv_cnt = 0;
 
-    public void changeMode(MapUnit map)
-    {
+    public void changeMode(MapUnit map) {
+
         Touch touch = new Touch();
-        if(map.face == null)
-        {
+        if (map.face == null) {
             map.face = new Face();
             map.face.face_x = map.PX;
             map.face.face_y = map.PY;
         }
 
+        if (map.id == -1) {
 
+            map.face.face_x = map.PX;
+            map.face.face_y = map.PY;
+            touch.startX = map.PX;
+            touch.startY = map.PY;
+            touch.type = Touch.TOUCH_NORMAL;
 
-            if(map.id == -1)
-            {
-                map.face.face_x = map.PX;
-                map.face.face_y = map.PY;
-                touch.startX = map.PX;
-                touch.startY = map.PY;
-                touch.type = Touch.TOUCH_NORMAL;
+            map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
 
-                map.id= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+            temp[0] = 0x00;
+            byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte) 0x02, temp, 1);
+            mgmt.atouchSend(bytes);
 
-                temp2[0] = 0x00;
-                byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x02, temp2, 1);
-                mgmt.atouchSend(bytes);
+            is_mouse = false;
+        } else {
+            mgmt.atouch.up(map.id);
+            map.id = -1;
+            temp[0] = 0x01;
+            byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte) 0x02, temp, 1);
+            mgmt.atouchSend(bytes);
 
-                map.face.is_mouse = false;
-            }else
-            {
-                mgmt.atouch.up(map.id);
-                map.id = -1;
-                temp2[0] = 0x01;
-                byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x02, temp2, 1);
-                mgmt.atouchSend(bytes);
-
-                map.face.is_mouse = true;
-            }
+            is_mouse = true;
+        }
 
     }
 
-    public boolean procMouse(byte[] buf, int len)
-    {
-        boolean isMouse;
+    public ProcMouse(){
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                if(mouse_recv_cnt == 0 && is_mouse_show)
+                {
+                    temp[0] = 0x00;
+                    byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte) 0x02, temp, 1);
+                    if(mgmt.atouchSend(bytes))
+                        is_mouse_show = false;
+                }else{
+                    mouse_recv_cnt = 0;
+                }
+            }
+        };
+        timer.schedule(task,2000,2000);
+    }
+
+    public boolean procMouse(byte[] buf, int len) {
+
+        mouse_recv_cnt++;
+
+        if(is_mouse)
+        {
+            if(!is_mouse_show)
+            {
+                temp[0] = 0x01;
+                byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte) 0x02, temp, 1);
+                mgmt.atouchSend(bytes);
+                is_mouse_show = true;
+            }
+
+            byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte) 0x01, buf, 4);
+            mgmt.atouchSend(bytes);
+            return false;
+        }
+
         Touch touch = new Touch();
         if (mgmt.maplist == null) {
             return false;
         }
 
         for (MapUnit map : mgmt.maplist) {
-            if(map.DeviceValue == MapUnit.DEVICE_VALUE_MOUSE && map.MFV == MapUnit.MFV_NORMAL)
-            {
-                isMouse = true;
+            if (map.DeviceValue == MapUnit.DEVICE_VALUE_MOUSE && map.MFV == MapUnit.MFV_NORMAL) {
 
-                for (MapUnit m : mgmt.maplist) {
-                    if(m.MFV == MapUnit.MFV_MOUSE && m.face != null)
-                    {
-                        if(m.face != null)
-                        {
-                            if(m.face.is_mouse)
-                            {
-                                isMouse = false;
-                            }
-                        }
-                    }
-                }
 
-                if(isMouse) {
+                if (!is_mouse) {
                     if (map.FV0 == MapUnit.FV0_NORMAL_NORMAL) {
                         if (map.KeyCode == MOUSE_CODE_L) {
                             if ((map.id == -1) && ((buf[0] & 0x01) == 0x01)) {
@@ -177,21 +199,14 @@ public class ProcMouse {
                         }
                     }
                 }
-            }else if(map.MFV == MapUnit.MFV_MOUSE)
-            {
-                if(map.face == null)
-                {
+            } else if (map.MFV == MapUnit.MFV_MOUSE) {
+                if (map.face == null) {
                     map.face = new Face();
                     map.face.face_x = map.PX;
                     map.face.face_y = map.PY;
                 }
 
-                if(map.face.is_mouse)
-                {
-                    byte[] bytes = mgmt.atouchRecv.atouchCreatCmd((byte)0x01, buf, 4);
-                    mgmt.atouchSend(bytes);
 
-                }else{
 
                     if (map.KeyCode == MOUSE_CODE_L) {
                         if ((buf[0] & 0x01) == 0x01) {
@@ -210,11 +225,9 @@ public class ProcMouse {
                     map.face.face_x += buf[1];
                     map.face.face_y += buf[2];
 
-                    if (!map.face.is_watch)
-                    {
-                        if ( (map.face.face_x < (map.PX - FACE_STEP)) || (map.face.face_x > (map.PX + FACE_STEP)) ||
-                                (map.face.face_y < (map.PY - FACE_STEP)) || (map.face.face_y > (map.PY + FACE_STEP)))
-                        {
+                    if (!map.face.is_watch) {
+                        if ((map.face.face_x < (map.PX - FACE_STEP)) || (map.face.face_x > (map.PX + FACE_STEP)) ||
+                                (map.face.face_y < (map.PY - FACE_STEP)) || (map.face.face_y > (map.PY + FACE_STEP))) {
                             mgmt.atouch.up(map.id);
                             map.id = -1;
                             map.face.face_x = map.PX;
@@ -225,16 +238,14 @@ public class ProcMouse {
                             touch.startY = map.PY;
                             touch.type = Touch.TOUCH_NORMAL;
 
-                            map.id= mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+                            map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
                         }
-                    }
-                    else
-                    {
-                        map.face.face_x = limit(map.face.face_x, map.FV1 - WATCH_STEP*2, map.FV1 + WATCH_STEP);
+                    } else {
+                        map.face.face_x = limit(map.face.face_x, map.FV1 - WATCH_STEP * 2, map.FV1 + WATCH_STEP);
                         map.face.face_y = limit(map.face.face_y, map.FV2 - WATCH_STEP, map.FV2 + WATCH_STEP);
                     }
-                    mgmt.atouch.move(map.id,map.face.face_x, map.face.face_y);
-                }
+                    mgmt.atouch.move(map.id, map.face.face_x, map.face.face_y);
+
 
             }
         }
@@ -314,12 +325,10 @@ public class ProcMouse {
         return true;
     }
 
-    void set_watch_status(MapUnit map,boolean isdown)
-    {
+    void set_watch_status(MapUnit map, boolean isdown) {
         Touch touch = new Touch();
         map.face.is_watch = isdown;
-        if (map.face.is_watch && map.id != -1)
-        {
+        if (map.face.is_watch && map.id != -1) {
             mgmt.atouch.up(map.id);
 
             try {
@@ -335,10 +344,8 @@ public class ProcMouse {
             touch.startY = map.FV2;
             touch.type = Touch.TOUCH_NORMAL;
 
-            map.id = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
-        }
-        else if ((!map.face.is_watch) && map.id != -1)
-        {
+            map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
+        } else if ((!map.face.is_watch) && map.id != -1) {
             mgmt.atouch.up(map.id);
 
             try {
@@ -354,12 +361,12 @@ public class ProcMouse {
             touch.startY = map.PY;
             touch.type = Touch.TOUCH_NORMAL;
 
-            map.id = mgmt.atouch.down(touch.type,touch.startX,touch.startY,touch.endX,touch.endY,touch.step);
+            map.id = mgmt.atouch.down(touch.type, touch.startX, touch.startY, touch.endX, touch.endY, touch.step);
         }
     }
 
-    public class Face{
-        public boolean is_mouse = true;
+    public class Face {
+
         public boolean is_watch = false;
         public int face_x = 0, face_y = 0;
     }
