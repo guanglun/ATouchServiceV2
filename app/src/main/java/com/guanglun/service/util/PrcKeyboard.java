@@ -49,6 +49,7 @@ public class PrcKeyboard {
     void getEvent(byte[] buf) {
         int i = 0;
         KBEvent event;
+
         if ((buf[0] & (byte) 0x01) == (byte) 0x01) {
             event = mapKB.get(KB_LEFT_CTRL);
 
@@ -65,7 +66,6 @@ public class PrcKeyboard {
             event = new KBEvent(KB_LEFT_CTRL, EVENT_K_DOWN);
             mapKBFlag.put(event.code, event);
         }
-
         if ((buf[0] & 0x02) == 0x02) {
             event = mapKB.get(KB_LEFT_SHIFT);
             if (event != null) {
@@ -81,7 +81,6 @@ public class PrcKeyboard {
             event = new KBEvent(KB_LEFT_SHIFT, EVENT_K_DOWN);
             mapKBFlag.put(event.code, event);
         }
-
         if ((buf[0] & 0x04) == 0x04) {
             event = mapKB.get(KB_LEFT_ALT);
             if (event != null) {
@@ -97,7 +96,6 @@ public class PrcKeyboard {
             event = new KBEvent(KB_LEFT_ALT, EVENT_K_DOWN);
             mapKBFlag.put(event.code, event);
         }
-
         if ((buf[0] & 0x08) == 0x08) {
             event = mapKB.get(KB_LEFT_GUI);
             if (event != null) {
@@ -129,7 +127,6 @@ public class PrcKeyboard {
             event = new KBEvent(KB_RIGHT_CTRL, EVENT_K_DOWN);
             mapKBFlag.put(event.code, event);
         }
-
         if ((buf[0] & 0x20) == 0x20) {
             event = mapKB.get(KB_RIGHT_SHIFT);
             if (event != null) {
@@ -145,7 +142,6 @@ public class PrcKeyboard {
             event = new KBEvent(KB_RIGHT_SHIFT, EVENT_K_DOWN);
             mapKBFlag.put(event.code, event);
         }
-
         if ((buf[0] & 0x40) == 0x40) {
             event = mapKB.get(KB_RIGHT_ALT);
             if (event != null) {
@@ -161,7 +157,6 @@ public class PrcKeyboard {
             event = new KBEvent(KB_RIGHT_ALT, EVENT_K_DOWN);
             mapKBFlag.put(event.code, event);
         }
-
         if ((buf[0] & 0x80) == 0x80) {
             event = mapKB.get(KB_RIGHT_GUI);
             if (event != null) {
@@ -239,7 +234,8 @@ public class PrcKeyboard {
                                     }
                                 }
 
-                            } else if (event.event == EVENT_K_UP && map.id != -1) {
+                            }
+                            else if (event.event == EVENT_K_UP && map.id != -1) {
                                 mgmt.atouch.up(map.id);
                                 map.id = -1;
 
@@ -270,14 +266,13 @@ public class PrcKeyboard {
                             }
                         }
                     }
-                } else if (map.MFV == MapUnit.MFV_PUBG) {
+                }
+                else if (map.MFV == MapUnit.MFV_PUBG) {
                     if (map.slide == null) {
                         map.slide = new Slide();
                         map.slide.move_x = map.PX;
                         map.slide.move_y = map.PY;
                     }
-
-                    //Log.i(EasyTool.TAG, "code : " + event.code);
 
                     //top
                     if (map.KeyCode == event.code) {
@@ -323,7 +318,8 @@ public class PrcKeyboard {
                             map.slide.is_left_shift_down = false;
                         }
                     }
-                } else if (map.MFV == MapUnit.MFV_MOUSE) {
+                }
+                else if (map.MFV == MapUnit.MFV_MOUSE) {
                     Log.i(EasyTool.TAG,map.toString());
 
                     if (map.KeyCode == event.code) {
@@ -415,8 +411,8 @@ public class PrcKeyboard {
 
 
     public static class Slide {
-        private int move_x, move_y;
-        private boolean is_left_shift_down = false;
+        public int move_x, move_y;
+        public boolean is_left_shift_down = false;
     }
 }
 

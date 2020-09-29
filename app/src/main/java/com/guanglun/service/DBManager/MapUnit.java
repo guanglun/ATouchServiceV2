@@ -2,6 +2,7 @@ package com.guanglun.service.DBManager;
 
 import android.content.ContentValues;
 
+import com.guanglun.service.util.PrcJoyStick;
 import com.guanglun.service.util.PrcKeyboard;
 import com.guanglun.service.util.ProcMouse;
 
@@ -10,11 +11,13 @@ public class MapUnit {
     final static public int DEVICE_VALUE_NULL      = 0;
     final static public int DEVICE_VALUE_MOUSE     = 1;
     final static public int DEVICE_VALUE_KEYBOARD  = 2;
+    final static public int DEVICE_VALUE_JOYSTICK  = 3;
 
     final static public int MFV_NULL       = 0;
     final static public int MFV_NORMAL     = 1;
     final static public int MFV_PUBG       = 2;
     final static public int MFV_MOUSE      = 3;
+    final static public int MFV_ROCKER      = 4;
 
     final static public int FV0_NORMAL_NORMAL   = 0;
     final static public int FV0_NORMAL_LONG     = 1;
@@ -54,6 +57,7 @@ public class MapUnit {
 
     public PrcKeyboard.Slide slide = null;
     public  ProcMouse.Face face = null;
+    public  PrcJoyStick.Rocker rocker = null;
 
     public MapUnit()
     {

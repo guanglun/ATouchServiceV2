@@ -199,14 +199,13 @@ public class ProcMouse {
                         }
                     }
                 }
-            } else if (map.MFV == MapUnit.MFV_MOUSE) {
+            }
+            else if (map.MFV == MapUnit.MFV_MOUSE) {
                 if (map.face == null) {
                     map.face = new Face();
                     map.face.face_x = map.PX;
                     map.face.face_y = map.PY;
                 }
-
-
 
                     if (map.KeyCode == MOUSE_CODE_L) {
                         if ((buf[0] & 0x01) == 0x01) {
@@ -366,7 +365,6 @@ public class ProcMouse {
     }
 
     public class Face {
-
         public boolean is_watch = false;
         public int face_x = 0, face_y = 0;
     }

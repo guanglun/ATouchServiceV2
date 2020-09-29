@@ -21,6 +21,7 @@ public class DeviceMgmt {
     public List<MapUnit> maplist = null;
     public PrcKeyboard procKB = new PrcKeyboard();
     public ProcMouse procMouse = new ProcMouse();
+    public PrcJoyStick procJS = new PrcJoyStick();
 
     public AutoTouch atouch;
 
@@ -36,6 +37,7 @@ public class DeviceMgmt {
         s_pubg.init(this);
         procKB.init(this);
         procMouse.init(this);
+        procJS.init(this);
 
         tcpServer = new TCPServer(1989, new TCPServer.OnReceiveListener() {
             @Override

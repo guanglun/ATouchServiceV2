@@ -77,6 +77,14 @@ public class ADBRecv {
                 mgmt.atouchSend(bytes);
 
                 break;
+            case 0x01:
+                if (len >= 4)
+                {
+                    bytes = new byte[len-1];
+                    System.arraycopy(buf,1,bytes,0,len-1);
+                    mgmt.procJS.procJS(bytes);
+                }
+                break;
             case 0x02:
                 if (len >= 4)
                 {
@@ -87,7 +95,7 @@ public class ADBRecv {
                 break;
 
             case 0x03:
-                if (len == 9)
+                if (len >= 8)
                 {
                     bytes = new byte[len-1];
                     System.arraycopy(buf,1,bytes,0,len-1);
