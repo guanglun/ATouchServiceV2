@@ -22,6 +22,7 @@ public class DeviceMgmt {
     public PrcKeyboard procKB = new PrcKeyboard();
     public ProcMouse procMouse = new ProcMouse();
     public PrcJoyStick procJS = new PrcJoyStick();
+    public PrcATouch procAT = new PrcATouch();
 
     public AutoTouch atouch;
 
@@ -38,6 +39,7 @@ public class DeviceMgmt {
         procKB.init(this);
         procMouse.init(this);
         procJS.init(this);
+        procAT.init(this);
 
         tcpServer = new TCPServer(1989, new TCPServer.OnReceiveListener() {
             @Override

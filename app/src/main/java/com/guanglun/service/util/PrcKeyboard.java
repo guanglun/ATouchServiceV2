@@ -320,7 +320,7 @@ public class PrcKeyboard {
                     }
                 }
                 else if (map.MFV == MapUnit.MFV_MOUSE) {
-                    Log.i(EasyTool.TAG,map.toString());
+                    //Log.i(EasyTool.TAG,map.toString());
 
                     if (map.KeyCode == event.code) {
                         if(event.event == EVENT_K_DOWN)
@@ -341,6 +341,18 @@ public class PrcKeyboard {
                             if(map.face != null)
                             {
                                 mgmt.procMouse.set_watch_status(map,false);
+                            }
+                        }
+                    }
+                }else if (map.MFV == MapUnit.MFV_ATOUCH) {
+                    //Log.i(EasyTool.TAG,map.toString());
+
+                    if (map.FV0 == event.code) {
+                        if(event.event == EVENT_K_DOWN)
+                        {
+                            if(map.atouch != null)
+                            {
+                                map.atouch.is_enable = !map.atouch.is_enable;
                             }
                         }
                     }

@@ -102,7 +102,14 @@ public class ADBRecv {
                     mgmt.procKB.procKB(bytes);
                 }
                 break;
-
+            case 0x04:
+                if (len >= 12)
+                {
+                    bytes = new byte[len-1];
+                    System.arraycopy(buf,1,bytes,0,len-1);
+                    mgmt.procAT.procAT(bytes);
+                }
+                break;
             default:
                 break;
         }
